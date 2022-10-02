@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set -euo pipefail
+
+/opt/extensions/merloc-gatekeeper-ext/bin/node /opt/extensions/merloc-gatekeeper-ext/src/index.js

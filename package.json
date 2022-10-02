@@ -1,0 +1,37 @@
+{
+    "name": "merloc-gatekeeper",
+    "version": "0.0.0",
+    "description": "MerLoc universal (runtime agnostic) GateKeeper component implementation based on AWS Lambda extension",
+    "author": "Serkan Özal <serkan@thundra.io> (https://github.com/serkan-ozal)",
+    "homepage": "https://github.com/thundra-io/merloc-gatekeeper-aws-lambda-extension",
+    "repository": "thundra-io/merloc-gatekeeper-aws-lambda-extension",
+    "license": "Apache License 2",
+    "main": "src/index.js",
+    "keywords": [
+        "serverless",
+        "aws",
+        "aws-lambda",
+        "debugging",
+        "hot-reload",
+        "merloc"
+    ],
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "lint-check": "prettier --config .prettierrc.json --check ./src/*.js ./src/**/*.js",
+        "lint-format": "prettier --config .prettierrc.json --write ./src/*.js ./src/**/*.js"
+    },
+    "files": [
+        "src/",
+        "package.json",
+        "README.md",
+        "LICENSE"
+    ],
+    "devDependencies": {
+        "prettier": "^2.2.1"
+    },
+    "dependencies": {
+        "axios": "^0.27.2",
+        "body-parser": "^1.20.0",
+        "express": "^4.18.1"
+    }
+}
