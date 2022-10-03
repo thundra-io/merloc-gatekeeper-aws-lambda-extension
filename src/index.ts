@@ -1,9 +1,9 @@
-const logger = require('./logger');
-const { ExtensionClient } = require('./client/extensionClient');
+import * as logger from './logger';
+import ExtensionClient from './client/ExtensionClient';
 
-const express = require('express');
-const bodyParser = require('body-parser');
-const axios = require('axios').default;
+import express, { Request, Response } from 'express';
+import bodyParser from 'body-parser';
+import axios, { AxiosRequestHeaders, AxiosResponse } from 'axios';
 
 const app = express();
 app.use(bodyParser.json());
@@ -20,11 +20,11 @@ async function _initExtension() {
     logger.debug('Initializing extension ...');
 
     logger.debug('Creating extensions client ...');
-    const client = new ExtensionClient();
+    const client: ExtensionClient = new ExtensionClient();
     logger.debug('Created extensions client');
 
     logger.debug('Registering extension ...');
-    const id = await client.register(MERLOC_GATEKEEPER_EXTENSION_NAME, []);
+    const id: string = await client.register(MERLOC_GATEKEEPER_EXTENSION_NAME, []);
     logger.debug(`Registered extension with id ${id}`);
 
     if (!id) {
@@ -39,14 +39,14 @@ async function _initExtension() {
     logger.debug('Called for next event');
 }
 
-async function _forwardRequest(request, response) {
+async function _forwardRequest(request: Request, response: Response) {
     logger.debug(`Received "${request.path}" request `);
 
-    const pathToForwardRequest = `http://${process.env.AWS_LAMBDA_RUNTIME_API}${request.path}`;
-    const headers = {};
+    const pathToForwardRequest: string = `http://${process.env.AWS_LAMBDA_RUNTIME_API}${request.path}`;
+    const headers: AxiosRequestHeaders = {};
     if (request.headers) {
         for (const [name, value] of Object.entries(request.headers)) {
-            headers[name] = value;
+            headers[name] = value as string | number | boolean;
         }
     }
 
@@ -57,7 +57,7 @@ async function _forwardRequest(request, response) {
             )} ...`
     );
 
-    let res;
+    let res: AxiosResponse;
     if (request.method === 'GET') {
         res = await axios.get(pathToForwardRequest, { headers });
     } else if (request.method === 'POST') {
@@ -81,19 +81,19 @@ async function _forwardRequest(request, response) {
     logger.debug(`Returned response to "${request.path}" request`);
 }
 
-app.post(INIT_ERROR_PATH, async (request, response) => {
+app.post(INIT_ERROR_PATH, async (request: Request, response: Response) => {
     await _forwardRequest(request, response);
 });
 
-app.get(NEXT_INVOCATION_PATH, async (request, response) => {
+app.get(NEXT_INVOCATION_PATH, async (request: Request, response: Response) => {
     await _forwardRequest(request, response);
 });
 
-app.post(INVOCATION_RESPONSE_PATH, async (request, response) => {
+app.post(INVOCATION_RESPONSE_PATH, async (request: Request, response: Response) => {
     await _forwardRequest(request, response);
 });
 
-app.post(INVOCATION_ERROR_PATH, async (request, response) => {
+app.post(INVOCATION_ERROR_PATH, async (request: Request, response: Response) => {
     await _forwardRequest(request, response);
 });
 

@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-/opt/extensions/merloc-gatekeeper-ext/bin/node /opt/extensions/merloc-gatekeeper-ext/src/index.js
+/opt/extensions/merloc-gatekeeper-ext/bin/node /opt/extensions/merloc-gatekeeper-ext/dist/index.js

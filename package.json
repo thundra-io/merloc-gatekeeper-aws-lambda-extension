@@ -6,7 +6,7 @@
     "homepage": "https://github.com/thundra-io/merloc-gatekeeper-aws-lambda-extension",
     "repository": "thundra-io/merloc-gatekeeper-aws-lambda-extension",
     "license": "Apache License 2",
-    "main": "src/index.js",
+    "main": "src/index.ts",
     "keywords": [
         "serverless",
         "aws",
@@ -16,6 +16,7 @@
         "merloc"
     ],
     "scripts": {
+        "build": "tsc",
         "test": "echo \"Error: no test specified\" && exit 1",
         "lint-check": "prettier --config .prettierrc.json --check ./src/*.js ./src/**/*.js",
         "lint-format": "prettier --config .prettierrc.json --write ./src/*.js ./src/**/*.js"
@@ -27,11 +28,23 @@
         "LICENSE"
     ],
     "devDependencies": {
-        "prettier": "^2.2.1"
+        "@types/aws-lambda": "^8.10.84",
+        "@types/node": "^14.11.8",
+        "@types/ws": "^8.5.3",
+        "@typescript-eslint/eslint-plugin": "^5.10.1",
+        "@typescript-eslint/parser": "^5.10.1",
+        "eslint": "^8.7.0",
+        "eslint-config-airbnb-base": "^15.0.0",
+        "eslint-config-airbnb-typescript": "^16.1.0",
+        "eslint-plugin-import": "^2.25.4",
+        "ts-node": "^9.0.0",
+        "typescript": "^4.4.4"
     },
     "dependencies": {
+        "@types/express": "^4.17.14",
         "axios": "^0.27.2",
         "body-parser": "^1.20.0",
-        "express": "^4.18.1"
+        "express": "^4.18.1",
+        "ws": "^8.9.0"
     }
 }
