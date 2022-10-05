@@ -1,25 +1,25 @@
-const { MERLOC_GATEKEEPER_DEBUG_ENABLED } = require('./configs');
+const { MERLOC_DEBUG_ENABLED } = require('./configs');
 
 export function isDebugEnabled(): boolean {
-    return MERLOC_GATEKEEPER_DEBUG_ENABLED;
+    return MERLOC_DEBUG_ENABLED;
 }
 
-export function debug(msg: string): void {
-    if (MERLOC_GATEKEEPER_DEBUG_ENABLED) {
-        console.debug('[MERLOC-GATEKEEPER]', msg);
+export function debug(...args: any[]): void {
+    if (MERLOC_DEBUG_ENABLED) {
+        console.debug('[MERLOC-GATEKEEPER]', ...args);
     }
 }
 
-export function info(msg: string): void {
-    console.info('[MERLOC-GATEKEEPER]', msg);
+export function info(...args: any[]): void {
+    console.info('[MERLOC-GATEKEEPER]', ...args);
 }
 
-export function warn(msg: string): void {
-    console.warn('[MERLOC-GATEKEEPER]', msg);
+export function warn(...args: any[]): void {
+    console.warn('[MERLOC-GATEKEEPER]', ...args);
 }
 
-export function error(msg: string, e?: Error): void {
-    console.error('[MERLOC-GATEKEEPER]', msg, e);
+export function error(...args: any[]): void {
+    console.error('[MERLOC-GATEKEEPER]', ...args);
 }
 
 function _getCircularReplacer() {

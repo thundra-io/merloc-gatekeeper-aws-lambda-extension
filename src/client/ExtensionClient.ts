@@ -6,14 +6,17 @@ const LAMBDA_EXTENSION_NAME = 'lambda-extension-name';
 const LAMBDA_EXTENSION_IDENTIFIER = 'lambda-extension-identifier';
 
 export default class ExtensionClient {
-
     private extensionId: string;
+    private handler: string;
 
-    constructor() {
-    }
+    constructor() {}
 
     getExtensionId(): string {
         return this.extensionId;
+    }
+
+    getHandler(): string {
+        return this.handler;
     }
 
     async register(name: string, events: string[]): Promise<string> {
@@ -25,8 +28,7 @@ export default class ExtensionClient {
             events: events,
         };
 
-        const url: string =
-            `http://${process.env.AWS_LAMBDA_RUNTIME_API}/${LAMBDA_EXTENSION_VERSION}/extension/register`;
+        const url: string = `http://${process.env.AWS_LAMBDA_RUNTIME_API}/${LAMBDA_EXTENSION_VERSION}/extension/register`;
         const bodyJson: string = JSON.stringify(body);
 
         if (logger.isDebugEnabled()) {
@@ -47,6 +49,7 @@ export default class ExtensionClient {
         }
 
         this.extensionId = res.headers[LAMBDA_EXTENSION_IDENTIFIER];
+        this.handler = res.data.handler;
 
         return this.extensionId;
     }
@@ -61,8 +64,7 @@ export default class ExtensionClient {
             'Content-Type': 'application/json',
         };
 
-        const url: string =
-            `http://${process.env.AWS_LAMBDA_RUNTIME_API}/${LAMBDA_EXTENSION_VERSION}/extension/event/next`;
+        const url: string = `http://${process.env.AWS_LAMBDA_RUNTIME_API}/${LAMBDA_EXTENSION_VERSION}/extension/event/next`;
 
         if (logger.isDebugEnabled()) {
             logger.debug(
@@ -81,5 +83,4 @@ export default class ExtensionClient {
             throw new Error(`Failed to get next event: ${res.status}`);
         }
     }
-
 }
