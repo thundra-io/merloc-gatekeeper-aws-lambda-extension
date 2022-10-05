@@ -19,6 +19,10 @@ const LAMBDA_RUNTIME_INVOKED_FUNCTION_ARN_HEADER_NAME =
     'lambda-runtime-invoked-function-arn';
 const LAMBDA_RUNTIME_DEADLINE_MS_HEADER_NAME = 'lambda-runtime-deadline-ms';
 const LAMBDA_RUNTIME_TRACE_ID_HEADER_NAME = 'lambda-runtime-trace-id';
+const LAMBDA_RUNTIME_CLIENT_CONTEXT_HEADER_NAME =
+    'lambda-runtime-client-context';
+const LAMBDA_RUNTIME_COGNITO_IDENTITY_HEADER_NAME =
+    'lambda-runtime-cognito-identity';
 
 const MERLOC_LAMBDA_HANDLER_ENV_VAR_NAME = 'MERLOC_AWS_LAMBDA_HANDLER';
 const AWS_REGION_ENV_VAR_NAME = 'AWS_REGION';
@@ -99,8 +103,10 @@ export default class Runtime {
                 process.env[AWS_LAMBDA_LOG_GROUP_NAME_ENV_VAR_NAME],
             [AWS_LAMBDA_LOG_STREAM_NAME_ATTRIBUTE_NAME]:
                 process.env[AWS_LAMBDA_LOG_STREAM_NAME_ENV_VAR_NAME],
-            // TODO Client context
-            // TODO Cognito identity
+            [AWS_LAMBDA_CLIENT_CONTEXT_ATTRIBUTE_NAME]:
+                headers[LAMBDA_RUNTIME_CLIENT_CONTEXT_HEADER_NAME],
+            [AWS_LAMBDA_COGNITO_IDENTITY_ATTRIBUTE_NAME]:
+                headers[LAMBDA_RUNTIME_COGNITO_IDENTITY_HEADER_NAME],
             [AWS_LAMBDA_ENV_VARS_ATTRIBUTE_NAME]: Object.assign(
                 {
                     [AWS_LAMBDA_TRACE_ID_ENV_VAR_NAME]:
