@@ -6,6 +6,7 @@ import { BrokerEnvelope, BrokerPayload } from '../domain/BrokerEnvelope';
 
 const CONNECTION_NAME_HEADER_NAME = 'x-api-key';
 const BROKER_CONNECT_TIMEOUT = 3000;
+const MAX_FRAME_SIZE = 16 * 1024;
 
 type InFlightMessage = {
     readonly msg: any;
@@ -188,29 +189,65 @@ export default class BrokerClient {
         };
         const brokerPayloadJson: string = JSON.stringify(brokerPayload);
 
-        // TODO Handle fragmentation for big messages
+        if (brokerPayloadJson.length <= MAX_FRAME_SIZE) {
+            const brokerEnvelope: BrokerEnvelope = {
+                id: msg.id,
+                responseOf: msg.responseOf,
+                connectionName: msg.connectionName,
+                sourceConnectionId: msg.sourceConnectionId,
+                sourceConnectionType: msg.sourceConnectionType,
+                targetConnectionId: msg.targetConnectionId,
+                targetConnectionType: msg.targetConnectionType,
+                type: msg.type,
+                payload: brokerPayloadJson,
+                fragmented: false,
+                fragmentCount: -1,
+                fragmentNo: -1,
+            };
+            const brokerEnvelopeJson: string = JSON.stringify(brokerEnvelope);
 
-        const brokerEnvelope: BrokerEnvelope = {
-            id: msg.id,
-            responseOf: msg.responseOf,
-            connectionName: msg.connectionName,
-            sourceConnectionId: msg.sourceConnectionId,
-            sourceConnectionType: msg.sourceConnectionType,
-            targetConnectionId: msg.targetConnectionId,
-            targetConnectionType: msg.targetConnectionType,
-            type: msg.type,
-            payload: brokerPayloadJson,
-            fragmented: false,
-            fragmentCount: -1,
-            fragmentNo: -1,
-        };
-        const brokerEnvelopeJson: string = JSON.stringify(brokerEnvelope);
+            if (logger.isDebugEnabled()) {
+                logger.debug(
+                    `Sending message to broker: ${brokerEnvelopeJson}`
+                );
+            }
 
-        if (logger.isDebugEnabled()) {
-            logger.debug(`Sending message to broker: ${brokerEnvelopeJson}`);
+            this.brokerSocket?.send(brokerEnvelopeJson, cb);
+        } else {
+            const fragmentCount: number = Math.ceil(
+                brokerPayloadJson.length / MAX_FRAME_SIZE
+            );
+            for (let i = 0; i < fragmentCount; i++) {
+                const fragmentedPayload: string = brokerPayloadJson.substring(
+                    i * MAX_FRAME_SIZE,
+                    Math.min((i + 1) * MAX_FRAME_SIZE, brokerPayloadJson.length)
+                );
+                const brokerEnvelope: BrokerEnvelope = {
+                    id: msg.id,
+                    responseOf: msg.responseOf,
+                    connectionName: msg.connectionName,
+                    sourceConnectionId: msg.sourceConnectionId,
+                    sourceConnectionType: msg.sourceConnectionType,
+                    targetConnectionId: msg.targetConnectionId,
+                    targetConnectionType: msg.targetConnectionType,
+                    type: msg.type,
+                    payload: fragmentedPayload,
+                    fragmented: true,
+                    fragmentNo: i,
+                    fragmentCount,
+                };
+                const brokerEnvelopeJson: string =
+                    JSON.stringify(brokerEnvelope);
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug(
+                        `Sending message (fragment: ${i}) to broker: ${brokerEnvelopeJson}`
+                    );
+                }
+
+                this.brokerSocket?.send(brokerEnvelopeJson, cb);
+            }
         }
-
-        this.brokerSocket?.send(brokerEnvelopeJson, cb);
     }
 
     async send(
