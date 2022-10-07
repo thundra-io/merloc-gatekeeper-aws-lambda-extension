@@ -21,6 +21,9 @@ cp package.json $WORKSPACE_DIR/extensions/merloc-gatekeeper-ext
 cp package-lock.json $WORKSPACE_DIR/extensions/merloc-gatekeeper-ext
 cp tsconfig.json $WORKSPACE_DIR/extensions/merloc-gatekeeper-ext
 
+chmod +x $WORKSPACE_DIR/extensions/merloc-gatekeeper
+chmod +x $WORKSPACE_DIR/extensions/merloc-gatekeeper-ext/bootstrap
+
 pushd $WORKSPACE_DIR
 
 pushd extensions/merloc-gatekeeper-ext
