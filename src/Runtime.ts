@@ -72,7 +72,7 @@ export default class Runtime {
         this.invocationRequestQueue = new Queue<any>();
     }
 
-    _createClientRequest(
+    private _createClientRequest(
         headers: AxiosResponseHeaders,
         request: any
     ): BrokerMessage {
@@ -163,6 +163,9 @@ export default class Runtime {
 
                 if (connected) {
                     logger.debug('Got active broker client');
+
+                    await this.brokerClient.reset();
+                    logger.debug('Reset broker client');
 
                     const clientRequest: BrokerMessage =
                         this._createClientRequest(

@@ -22,15 +22,20 @@ export default class BrokerClient {
     private connected: boolean;
     private messageMap: Map<string, InFlightMessage>;
     private connectPromise: Promise<undefined> | undefined;
+    private fragmentedMessages: Map<string, Map<number, BrokerEnvelope>>;
 
     constructor(brokerURL: string, connectionName: string) {
         this.brokerURL = this._normalizeBrokerUrl(brokerURL);
         this.connectionName = connectionName;
         this.connected = false;
         this.messageMap = new Map<string, InFlightMessage>();
+        this.fragmentedMessages = new Map<
+            string,
+            Map<number, BrokerEnvelope>
+        >();
     }
 
-    _normalizeBrokerUrl(url: string): string {
+    private _normalizeBrokerUrl(url: string): string {
         if (url.startsWith('ws://') || url.startsWith('wss://')) {
             return url;
         } else {
@@ -38,7 +43,7 @@ export default class BrokerClient {
         }
     }
 
-    _destroyInFlightMessages(code: number, reason: string | Buffer) {
+    private _clearState(code: number, reason: string | Buffer) {
         for (let [msgId, inFlightMessage] of this.messageMap.entries()) {
             inFlightMessage.resolve(
                 new Error(
@@ -47,6 +52,7 @@ export default class BrokerClient {
             );
             this.messageMap.delete(msgId);
         }
+        this.fragmentedMessages.clear();
     }
 
     async connect(timeoutDuration: number = BROKER_CONNECT_TIMEOUT) {
@@ -126,7 +132,7 @@ export default class BrokerClient {
             this.connected = false;
             this.connectPromise = undefined;
             this.brokerSocket = null;
-            this._destroyInFlightMessages(-1, err.message);
+            this._clearState(-1, err.message);
         });
         this.brokerSocket.on('close', (code: number, reason: Buffer) => {
             logger.debug(
@@ -136,7 +142,7 @@ export default class BrokerClient {
             this.connected = false;
             this.connectPromise = undefined;
             this.brokerSocket = null;
-            this._destroyInFlightMessages(code, reason);
+            this._clearState(code, reason);
         });
 
         return this.connectPromise;
@@ -153,14 +159,62 @@ export default class BrokerClient {
         }
     }
 
-    _doReceive(data: string): BrokerMessage | undefined {
-        const brokerEnvelope: BrokerEnvelope = JSON.parse(data);
+    async reset() {
+        this._clearState(0, 'Reset');
+    }
+
+    private _doReceive(data: string): BrokerMessage | undefined {
+        let brokerEnvelope: BrokerEnvelope = JSON.parse(data);
         if (!brokerEnvelope || !brokerEnvelope.payload) {
             logger.error('Empty broker payload received');
             return;
         }
 
-        // TODO Handle fragmentation for big messages
+        if (brokerEnvelope.fragmented) {
+            const fragmentCount: number = brokerEnvelope.fragmentCount!;
+            let fragmentedEnvelopes: Map<number, BrokerEnvelope> | undefined =
+                this.fragmentedMessages.get(brokerEnvelope.id);
+            if (!fragmentedEnvelopes) {
+                fragmentedEnvelopes = new Map<number, BrokerEnvelope>();
+                this.fragmentedMessages.set(
+                    brokerEnvelope.id,
+                    fragmentedEnvelopes
+                );
+            }
+            fragmentedEnvelopes.set(brokerEnvelope.fragmentNo!, brokerEnvelope);
+            if (logger.isDebugEnabled()) {
+                logger.debug(
+                    `Buffering fragmented message (fragment=${brokerEnvelope.fragmentNo}): ${brokerEnvelope.payload} ...`
+                );
+            }
+            if (fragmentedEnvelopes.size >= fragmentCount) {
+                // Sort fragments by fragment orders
+                const sortedFragmentedEnvelopes: Map<number, BrokerEnvelope> =
+                    new Map(
+                        [...fragmentedEnvelopes].sort(
+                            (
+                                a: [number, BrokerEnvelope],
+                                b: [number, BrokerEnvelope]
+                            ) => a[0] - b[0]
+                        )
+                    );
+                let stickedPayload: string = '';
+                // Stick fragmented payloads
+                for (let envelope of sortedFragmentedEnvelopes.values()) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(
+                            `Sticking fragmented message (fragment=${envelope.fragmentNo}): ${envelope.payload} ...`
+                        );
+                    }
+                    stickedPayload = stickedPayload.concat(envelope.payload);
+                }
+                brokerEnvelope.payload = stickedPayload;
+            } else {
+                // Not received all fragments, don't process this envelope now.
+                // Because the merged envelope will be processed later once all the fragments are received.
+                return undefined;
+            }
+        }
 
         const brokerPayload: BrokerPayload = JSON.parse(brokerEnvelope.payload);
         if (!brokerPayload) {
@@ -182,7 +236,7 @@ export default class BrokerClient {
         } as BrokerMessage;
     }
 
-    async _doSend(msg: BrokerMessage, cb: (err?: Error) => void) {
+    private async _doSend(msg: BrokerMessage, cb: (err?: Error) => void) {
         const brokerPayload: BrokerPayload = {
             data: msg.data,
             error: msg.error,
