@@ -62,9 +62,9 @@ export type InvocationRequest = {
 };
 
 export default class Runtime {
-    private readonly extensionClient: ExtensionClient;
-    private readonly brokerClient: BrokerClient;
-    private readonly invocationRequestQueue: Queue<InvocationRequest>;
+    private extensionClient: ExtensionClient;
+    private brokerClient: BrokerClient;
+    private invocationRequestQueue: Queue<InvocationRequest>;
 
     constructor(extensionClient: ExtensionClient, brokerClient: BrokerClient) {
         this.extensionClient = extensionClient;
@@ -91,7 +91,7 @@ export default class Runtime {
             [AWS_LAMBDA_FUNCTION_VERSION_ATTRIBUTE_NAME]:
                 process.env[AWS_LAMBDA_FUNCTION_VERSION_ENV_VAR_NAME],
             [AWS_LAMBDA_RUNTIME_ATTRIBUTE_NAME]:
-                process.env[AWS_EXECUTION_ENV_ENV_VAR_NAME],
+                process.env[AWS_EXECUTION_ENV_ENV_VAR_NAME] || 'merloc',
             [AWS_LAMBDA_TIMEOUT_ATTRIBUTE_NAME]:
                 parseInt(headers[LAMBDA_RUNTIME_DEADLINE_MS_HEADER_NAME]) -
                 Date.now(),
@@ -153,13 +153,21 @@ export default class Runtime {
             let forwardToRealLambdaRuntime = true;
 
             try {
-                let connected = true;
-                await this.brokerClient
-                    .ensureConnected()
-                    .catch((err: Error) => {
-                        logger.error('Unable to connect to broker', err);
-                        connected = false;
-                    });
+                let connected = await this.brokerClient.checkConnected();
+                logger.debug(`Broker client connected: ${connected}`);
+                if (!connected) {
+                    logger.debug(
+                        'Broker client disconnected, so creating new fresh broker client ...'
+                    );
+                    const newBrokerClient: BrokerClient | undefined =
+                        await this.brokerClient.recreateAndConnect();
+                    if (newBrokerClient) {
+                        this.brokerClient = newBrokerClient;
+                        connected = true;
+                    } else {
+                        logger.debug('');
+                    }
+                }
 
                 if (connected) {
                     logger.debug('Got active broker client');

@@ -3,9 +3,15 @@ import { v4 as uuidv4 } from 'uuid';
 import * as logger from '../logger';
 import { BrokerMessage } from '../domain/BrokerMessage';
 import { BrokerEnvelope, BrokerPayload } from '../domain/BrokerEnvelope';
+import {
+    MERLOC_BROKER_CONNECTION_NAME,
+    MERLOC_BROKER_URL,
+    MERLOC_ENABLED,
+} from '../configs';
 
 const CONNECTION_NAME_HEADER_NAME = 'x-api-key';
 const BROKER_CONNECT_TIMEOUT = 3000;
+const BROKER_PING_TIMEOUT = 3000;
 const MAX_FRAME_SIZE = 16 * 1024;
 
 type InFlightMessage = {
@@ -116,6 +122,9 @@ export default class BrokerClient {
                 }
             }
         });
+        this.brokerSocket.on('pong', (data) => {
+            logger.debug(`Received pong message from broker`);
+        });
         this.brokerSocket.on('error', (err) => {
             logger.debug(
                 `Error from broker connection at ${this.brokerURL}`,
@@ -148,15 +157,69 @@ export default class BrokerClient {
         return this.connectPromise;
     }
 
-    async ensureConnected() {
+    private async _sendPing(): Promise<boolean> {
+        return new Promise((resolve: Function, reject: Function) => {
+            let timeout: NodeJS.Timeout = setTimeout(() => {
+                logger.debug(
+                    `Timeout while sending to broker after ${BROKER_PING_TIMEOUT} milliseconds`
+                );
+                resolve(false);
+            });
+            try {
+                logger.debug(`Sending ping to broker ...`);
+                this.brokerSocket?.ping((err?: Error) => {
+                    try {
+                        if (err) {
+                            resolve(false);
+                        } else {
+                            resolve(true);
+                        }
+                    } finally {
+                        clearTimeout(timeout);
+                    }
+                });
+            } catch (err: any) {
+                logger.debug(
+                    `Error occurred while sending ping to broker`,
+                    err
+                );
+                resolve(false);
+            }
+        });
+    }
+
+    async checkConnected(): Promise<boolean> {
         if (this.connected) {
-            return;
+            return await this._sendPing();
         }
         if (this.connectPromise) {
             await this.connectPromise;
+            return await this._sendPing();
         } else {
-            throw new Error(`Not connected to broker at ${this.brokerURL}`);
+            return false;
         }
+    }
+
+    async recreateAndConnect(): Promise<BrokerClient | undefined> {
+        logger.debug('Recreating broker client and connecting to broker ...');
+        return new Promise<BrokerClient | undefined>((res, rej) => {
+            logger.debug('Creating broker client ...');
+            const client: BrokerClient = new BrokerClient(
+                this.brokerURL,
+                this.connectionName
+            );
+            logger.debug('Created broker client');
+            client
+                .connect()
+                .then(() => {
+                    logger.debug('Connected to broker');
+                    res(client);
+                })
+                .catch((err: Error) => {
+                    logger.error('Unable to connect to broker', err);
+                    res(undefined);
+                });
+        });
     }
 
     async reset() {

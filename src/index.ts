@@ -239,7 +239,7 @@ app.post(
 );
 
 app.listen(MERLOC_GATEKEEPER_RUNTIME_API_PORT, function () {
-    logger.info(
+    logger.debug(
         `MerLoc GateKeeper Runtime API listening on port ${MERLOC_GATEKEEPER_RUNTIME_API_PORT}`
     );
 });
