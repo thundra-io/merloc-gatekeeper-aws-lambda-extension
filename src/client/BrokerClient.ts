@@ -3,13 +3,9 @@ import { v4 as uuidv4 } from 'uuid';
 import * as logger from '../logger';
 import { BrokerMessage } from '../domain/BrokerMessage';
 import { BrokerEnvelope, BrokerPayload } from '../domain/BrokerEnvelope';
-import {
-    MERLOC_BROKER_CONNECTION_NAME,
-    MERLOC_BROKER_URL,
-    MERLOC_ENABLED,
-} from '../configs';
 
 const CONNECTION_NAME_HEADER_NAME = 'x-api-key';
+const GATEKEEPER_CONNECTION_NAME_PREFIX = 'gatekeeper::';
 const BROKER_CONNECT_TIMEOUT = 3000;
 const BROKER_PING_TIMEOUT = 3000;
 const MAX_FRAME_SIZE = 16 * 1024;
@@ -86,7 +82,8 @@ export default class BrokerClient {
 
         this.brokerSocket = new WebSocket(this.brokerURL, {
             headers: {
-                [CONNECTION_NAME_HEADER_NAME]: this.connectionName,
+                [CONNECTION_NAME_HEADER_NAME]:
+                    GATEKEEPER_CONNECTION_NAME_PREFIX + this.connectionName,
             },
             handshakeTimeout: timeoutDuration,
             followRedirects: true,
