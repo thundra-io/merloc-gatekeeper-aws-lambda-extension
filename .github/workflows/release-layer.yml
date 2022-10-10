@@ -12,10 +12,10 @@ jobs:
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
-      - name: Install Node.js 12.x
+      - name: Install Node.js 16.x
         uses: actions/setup-node@v2
         with:
-          node-version: "12.x"
+          node-version: "16.x"
           registry-url: https://registry.npmjs.org
       - name: Install AWS CLI
         uses: unfor19/install-aws-cli-action@v1.0.2
