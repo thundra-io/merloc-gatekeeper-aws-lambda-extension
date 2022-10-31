@@ -71,12 +71,27 @@ export default class Runtime {
         this.invocationRequestQueue = new Queue<any>();
     }
 
+    private _getEnvVars(headers: AxiosResponseHeaders): any {
+        return Object.assign(
+            {
+                [AWS_LAMBDA_TRACE_ID_ENV_VAR_NAME]:
+                    headers[LAMBDA_RUNTIME_TRACE_ID_HEADER_NAME],
+                [MERLOC_LAMBDA_HANDLER_ENV_VAR_NAME]:
+                    process.env[MERLOC_LAMBDA_HANDLER_ENV_VAR_NAME],
+            },
+            process.env,
+            {
+                NODE_OPTIONS: process.env._NODE_OPTIONS,
+                _NODE_OPTIONS: undefined,
+            }
+        );
+    }
+
     private _createClientRequest(
         connectionName: string,
         headers: AxiosResponseHeaders,
         request: any
     ): BrokerMessage {
-        //
         const data: any = {
             [AWS_LAMBDA_REGION_ATTRIBUTE_NAME]:
                 process.env[AWS_REGION_ENV_VAR_NAME],
@@ -107,18 +122,7 @@ export default class Runtime {
                 headers[LAMBDA_RUNTIME_CLIENT_CONTEXT_HEADER_NAME],
             [AWS_LAMBDA_COGNITO_IDENTITY_ATTRIBUTE_NAME]:
                 headers[LAMBDA_RUNTIME_COGNITO_IDENTITY_HEADER_NAME],
-            [AWS_LAMBDA_ENV_VARS_ATTRIBUTE_NAME]: Object.assign(
-                {
-                    [AWS_LAMBDA_TRACE_ID_ENV_VAR_NAME]:
-                        headers[LAMBDA_RUNTIME_TRACE_ID_HEADER_NAME],
-                    [MERLOC_LAMBDA_HANDLER_ENV_VAR_NAME]:
-                        process.env[MERLOC_LAMBDA_HANDLER_ENV_VAR_NAME],
-                },
-                process.env,
-                {
-                    NODE_OPTIONS: process.env._NODE_OPTIONS,
-                }
-            ),
+            [AWS_LAMBDA_ENV_VARS_ATTRIBUTE_NAME]: this._getEnvVars(headers),
             [AWS_LAMBDA_REQUEST_ATTRIBUTE_NAME]: JSON.stringify(request),
         };
         return {
