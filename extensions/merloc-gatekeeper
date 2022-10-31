@@ -6,4 +6,5 @@ set -euo pipefail
 # Otherwise it causes problem when "NODE_OPTIONS" is specified with debug args for main Lambda process.
 # Because in this cases, both main Lambda process and this "MerLoc GateKeeper" extension process will try to start in debug mode
 # and try to listen from same debug port.
-NODE_OPTIONS="" /opt/extensions/merloc-gatekeeper-ext/bin/node /opt/extensions/merloc-gatekeeper-ext/dist/index.js
+# Also to keep original "NODE_OPTIONS", set its value to "_NODE_OPTIONS" so we can send original value to client.
+_NODE_OPTIONS=$NODE_OPTIONS NODE_OPTIONS="" /opt/extensions/merloc-gatekeeper-ext/bin/node /opt/extensions/merloc-gatekeeper-ext/dist/index.js

@@ -114,7 +114,10 @@ export default class Runtime {
                     [MERLOC_LAMBDA_HANDLER_ENV_VAR_NAME]:
                         process.env[MERLOC_LAMBDA_HANDLER_ENV_VAR_NAME],
                 },
-                process.env
+                process.env,
+                {
+                    NODE_OPTIONS: process.env._NODE_OPTIONS,
+                }
             ),
             [AWS_LAMBDA_REQUEST_ATTRIBUTE_NAME]: JSON.stringify(request),
         };
