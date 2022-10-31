@@ -56,6 +56,7 @@ do
         --layer-name $LAYER_NAME \
         --description "$LAYER_NAME AWS Lambda extension layer" \
         --content S3Bucket=$ARTIFACT_BUCKET,S3Key=$ARTIFACT_OBJECT \
+        --compatible-architectures "x86_64" \
         --license-info "Apache License 2" \
         --region $REGION \
         --endpoint-url "https://lambda.$REGION.amazonaws.com" \
