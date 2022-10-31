@@ -10,7 +10,6 @@ import {
     INVOCATION_ERROR_PATH,
 } from './constants';
 import { v4 as uuidv4 } from 'uuid';
-import { MERLOC_BROKER_CONNECTION_NAME } from './configs';
 import Queue from './utils/Queue';
 
 const LAMBDA_RUNTIME_AWS_REQUEST_ID_HEADER_NAME =
@@ -73,6 +72,7 @@ export default class Runtime {
     }
 
     private _createClientRequest(
+        connectionName: string,
         headers: AxiosResponseHeaders,
         request: any
     ): BrokerMessage {
@@ -121,7 +121,7 @@ export default class Runtime {
         return {
             id: uuidv4(),
             type: CLIENT_REQUEST_MESSAGE_TYPE,
-            connectionName: MERLOC_BROKER_CONNECTION_NAME,
+            connectionName,
             sourceConnectionType: GATEKEEPER_CONNECTION_TYPE,
             targetConnectionType: CLIENT_CONNECTION_TYPE,
             data,
@@ -177,6 +177,7 @@ export default class Runtime {
 
                     const clientRequest: BrokerMessage =
                         this._createClientRequest(
+                            this.brokerClient.getFullConnectionName(),
                             nextInvocationResp.headers,
                             nextInvocationResp.data
                         );

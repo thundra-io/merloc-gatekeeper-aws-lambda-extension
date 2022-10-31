@@ -61,6 +61,12 @@ export default class BrokerClient {
         this.fragmentedMessages.clear();
     }
 
+    getFullConnectionName(): string {
+        return this.apiKey
+            ? `${this.connectionName}${CONNECTION_API_KEY_SEPARATOR}${this.apiKey}`
+            : this.connectionName;
+    }
+
     async connect(timeoutDuration: number = BROKER_CONNECT_TIMEOUT) {
         if (this.connected) {
             logger.debug(
@@ -86,9 +92,7 @@ export default class BrokerClient {
 
         this.brokerSocket = new WebSocket(this.brokerURL, {
             headers: {
-                [CONNECTION_NAME_HEADER_NAME]: this.apiKey
-                    ? `${GATEKEEPER_CONNECTION_NAME_PREFIX}${this.connectionName}${CONNECTION_API_KEY_SEPARATOR}${this.apiKey}`
-                    : `${GATEKEEPER_CONNECTION_NAME_PREFIX}${this.connectionName}`,
+                [CONNECTION_NAME_HEADER_NAME]: `${GATEKEEPER_CONNECTION_NAME_PREFIX}${this.getFullConnectionName()}`,
             },
             handshakeTimeout: timeoutDuration,
             followRedirects: true,
