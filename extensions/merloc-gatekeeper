@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euo pipefail
+set -eo pipefail
 
 # Clear "NODE_OPTIONS" here because "NODE_OPTIONS" is specified for main Lambda process, not for "MerLoc GateKeeper".
 # Otherwise it causes problem when "NODE_OPTIONS" is specified with debug args for main Lambda process.
