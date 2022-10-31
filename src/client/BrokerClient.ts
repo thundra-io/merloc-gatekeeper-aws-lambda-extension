@@ -4,8 +4,10 @@ import * as logger from '../logger';
 import { BrokerMessage } from '../domain/BrokerMessage';
 import { BrokerEnvelope, BrokerPayload } from '../domain/BrokerEnvelope';
 
+const CONNECTION_TYPE_SEPARATOR = '::';
+const CONNECTION_API_KEY_SEPARATOR = '##';
 const CONNECTION_NAME_HEADER_NAME = 'x-api-key';
-const GATEKEEPER_CONNECTION_NAME_PREFIX = 'gatekeeper::';
+const GATEKEEPER_CONNECTION_NAME_PREFIX = `gatekeeper${CONNECTION_TYPE_SEPARATOR}`;
 const BROKER_CONNECT_TIMEOUT = 3000;
 const BROKER_PING_TIMEOUT = 3000;
 const MAX_FRAME_SIZE = 16 * 1024;
@@ -21,14 +23,16 @@ export default class BrokerClient {
     private brokerSocket: WebSocket | null;
     private brokerURL: string;
     private connectionName: string;
+    private apiKey?: string;
     private connected: boolean;
     private messageMap: Map<string, InFlightMessage>;
     private connectPromise: Promise<undefined> | undefined;
     private fragmentedMessages: Map<string, Map<number, BrokerEnvelope>>;
 
-    constructor(brokerURL: string, connectionName: string) {
+    constructor(brokerURL: string, connectionName: string, apiKey?: string) {
         this.brokerURL = this._normalizeBrokerUrl(brokerURL);
         this.connectionName = connectionName;
+        this.apiKey = apiKey;
         this.connected = false;
         this.messageMap = new Map<string, InFlightMessage>();
         this.fragmentedMessages = new Map<
@@ -82,8 +86,9 @@ export default class BrokerClient {
 
         this.brokerSocket = new WebSocket(this.brokerURL, {
             headers: {
-                [CONNECTION_NAME_HEADER_NAME]:
-                    GATEKEEPER_CONNECTION_NAME_PREFIX + this.connectionName,
+                [CONNECTION_NAME_HEADER_NAME]: this.apiKey
+                    ? `${GATEKEEPER_CONNECTION_NAME_PREFIX}${this.connectionName}${CONNECTION_API_KEY_SEPARATOR}${this.apiKey}`
+                    : `${GATEKEEPER_CONNECTION_NAME_PREFIX}${this.connectionName}`,
             },
             handshakeTimeout: timeoutDuration,
             followRedirects: true,
@@ -203,7 +208,8 @@ export default class BrokerClient {
             logger.debug('Creating broker client ...');
             const client: BrokerClient = new BrokerClient(
                 this.brokerURL,
-                this.connectionName
+                this.connectionName,
+                this.apiKey
             );
             logger.debug('Created broker client');
             client

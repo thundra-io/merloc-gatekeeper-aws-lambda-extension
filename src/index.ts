@@ -19,6 +19,7 @@ import {
     MERLOC_ENABLED,
     MERLOC_BROKER_URL,
     MERLOC_BROKER_CONNECTION_NAME,
+    MERLOC_APIKEY,
 } from './configs';
 
 const app = express();
@@ -77,7 +78,8 @@ async function _initBroker(): Promise<BrokerClient | undefined> {
         }
         const client: BrokerClient = new BrokerClient(
             MERLOC_BROKER_URL,
-            MERLOC_BROKER_CONNECTION_NAME
+            MERLOC_BROKER_CONNECTION_NAME,
+            MERLOC_APIKEY
         );
         logger.debug('Created broker client');
 
