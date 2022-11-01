@@ -34,6 +34,7 @@ const AWS_LAMBDA_LOG_GROUP_NAME_ENV_VAR_NAME = 'AWS_LAMBDA_LOG_GROUP_NAME';
 const AWS_LAMBDA_LOG_STREAM_NAME_ENV_VAR_NAME = 'AWS_LAMBDA_LOG_STREAM_NAME';
 const AWS_LAMBDA_TRACE_ID_ENV_VAR_NAME = '_X_AMZN_TRACE_ID';
 
+const AWS_LAMBDA_INIT_TIME_ATTRIBUTE_NAME = 'initTime';
 const AWS_LAMBDA_REGION_ATTRIBUTE_NAME = 'region';
 const AWS_LAMBDA_REQUEST_ID_ATTRIBUTE_NAME = 'requestId';
 const AWS_LAMBDA_HANDLER_ATTRIBUTE_NAME = 'handler';
@@ -53,6 +54,10 @@ const AWS_LAMBDA_REQUEST_ATTRIBUTE_NAME = 'request';
 const CLIENT_CONNECTION_TYPE = 'client';
 const GATEKEEPER_CONNECTION_TYPE = 'gatekeeper';
 const CLIENT_REQUEST_MESSAGE_TYPE = 'client.request';
+
+const AWS_LAMBDA_INIT_TIME: number = Math.floor(
+    Date.now() - 1000 * process.uptime()
+);
 
 export type InvocationRequest = {
     data: any;
@@ -93,6 +98,7 @@ export default class Runtime {
         request: any
     ): BrokerMessage {
         const data: any = {
+            [AWS_LAMBDA_INIT_TIME_ATTRIBUTE_NAME]: AWS_LAMBDA_INIT_TIME,
             [AWS_LAMBDA_REGION_ATTRIBUTE_NAME]:
                 process.env[AWS_REGION_ENV_VAR_NAME],
             [AWS_LAMBDA_REQUEST_ID_ATTRIBUTE_NAME]:
