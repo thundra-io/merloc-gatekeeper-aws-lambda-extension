@@ -216,7 +216,7 @@ export default class Runtime {
                         await this.brokerClient
                             .sendAndGetResponse(clientRequest, remainingTime)
                             .catch((err: Error) => {
-                                logger.error(
+                                logger.debug(
                                     'Unable to send message and get response from broker',
                                     err
                                 );
