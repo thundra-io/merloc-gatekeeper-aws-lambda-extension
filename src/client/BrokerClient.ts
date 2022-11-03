@@ -8,6 +8,8 @@ const CONNECTION_TYPE_SEPARATOR = '::';
 const CONNECTION_API_KEY_SEPARATOR = '##';
 const CONNECTION_NAME_HEADER_NAME = 'x-api-key';
 const GATEKEEPER_CONNECTION_NAME_PREFIX = `gatekeeper${CONNECTION_TYPE_SEPARATOR}`;
+const CLIENT_DISCONNECT_MESSAGE_TYPE = 'client.disconnect';
+const WEBSOCKET_NORMAL_CLOSE_CODE = 1000;
 const BROKER_CONNECT_TIMEOUT = 3000;
 const BROKER_PING_TIMEOUT = 3000;
 const MAX_FRAME_SIZE = 16 * 1024;
@@ -51,7 +53,7 @@ export default class BrokerClient {
 
     private _clearState(code: number, reason: string | Buffer) {
         for (let [msgId, inFlightMessage] of this.messageMap.entries()) {
-            inFlightMessage.resolve(
+            inFlightMessage.reject(
                 new Error(
                     `Connection is closed (code=${code}, reason=${reason}`
                 )
@@ -115,15 +117,27 @@ export default class BrokerClient {
             const message: BrokerMessage | undefined = this._doReceive(
                 data.toString()
             );
-            if (message && message.responseOf) {
-                const inFlightMessage = this.messageMap.get(message.responseOf);
-                if (inFlightMessage) {
-                    this.messageMap.delete(message.id);
-                    if (inFlightMessage.resolve) {
-                        inFlightMessage.resolve(message);
-                    }
-                    if (inFlightMessage.timeout) {
-                        clearTimeout(inFlightMessage.timeout);
+            if (message) {
+                if (message.type === CLIENT_DISCONNECT_MESSAGE_TYPE) {
+                    logger.debug(
+                        'Client disconnected, so closing broker client.'
+                    );
+                    this.close(
+                        WEBSOCKET_NORMAL_CLOSE_CODE,
+                        'Client disconnected, so closing broker client.'
+                    );
+                } else if (message.responseOf) {
+                    const inFlightMessage = this.messageMap.get(
+                        message.responseOf
+                    );
+                    if (inFlightMessage) {
+                        this.messageMap.delete(message.id);
+                        if (inFlightMessage.resolve) {
+                            inFlightMessage.resolve(message);
+                        }
+                        if (inFlightMessage.timeout) {
+                            clearTimeout(inFlightMessage.timeout);
+                        }
                     }
                 }
             }
