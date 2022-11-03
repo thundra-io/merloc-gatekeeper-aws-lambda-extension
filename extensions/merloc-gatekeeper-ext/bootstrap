@@ -1,3 +1,12 @@
 #!/bin/bash
 
-AWS_LAMBDA_RUNTIME_API="127.0.0.1:9100" exec -- "$@"
+REDIRECT_RUNTIME_API="true"
+if [ "${AWS_SAM_LOCAL}" == "true" ]; then
+  REDIRECT_RUNTIME_API="false"
+fi
+
+if [ "${REDIRECT_RUNTIME_API}" == "true" ]; then
+  AWS_LAMBDA_RUNTIME_API="127.0.0.1:9100" exec -- "$@"
+else
+  exec -- "$@"
+fi
