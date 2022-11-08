@@ -15,12 +15,14 @@ trap cleanup EXIT
 cleanup
 
 mkdir -p $WORKSPACE_DIR
-cp -r extensions $WORKSPACE_DIR
+cp layer/bootstrap $WORKSPACE_DIR
+cp -r layer/extensions $WORKSPACE_DIR
 cp -r src $WORKSPACE_DIR/extensions/merloc-gatekeeper-ext
 cp package.json $WORKSPACE_DIR/extensions/merloc-gatekeeper-ext
 cp package-lock.json $WORKSPACE_DIR/extensions/merloc-gatekeeper-ext
 cp tsconfig.json $WORKSPACE_DIR/extensions/merloc-gatekeeper-ext
 
+chmod +x $WORKSPACE_DIR/bootstrap
 chmod +x $WORKSPACE_DIR/extensions/merloc-gatekeeper
 chmod +x $WORKSPACE_DIR/extensions/merloc-gatekeeper-ext/bootstrap
 
