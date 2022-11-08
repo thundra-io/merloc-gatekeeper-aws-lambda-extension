@@ -7,6 +7,8 @@ elif [ "${IS_LOCAL}" == "true" ]; then
   REDIRECT_RUNTIME_API="false"
 fi
 
+pushd /var/task/
+
 if [ "${REDIRECT_RUNTIME_API}" == "true" ]; then
   AWS_LAMBDA_RUNTIME_API="127.0.0.1:9100" exec $_HANDLER
 else
