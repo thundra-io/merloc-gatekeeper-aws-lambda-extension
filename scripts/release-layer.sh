@@ -1,8 +1,9 @@
 #!/bin/bash
 
-LAYER_NAME="merloc-gatekeeper"
+LAYER_NAME=${LAYER_NAME:-"merloc-gatekeeper"}
 REGIONS=( "ap-northeast-1" "ap-northeast-2" "ap-south-1" "ap-southeast-1" "ap-southeast-2" "ap-east-1" "ca-central-1" "eu-central-1" "eu-north-1" "eu-south-1" "eu-west-1" "eu-west-2" "eu-west-3" "sa-east-1" "us-east-1" "us-east-2" "us-west-1" "us-west-2" )
-BUCKET_PREFIX="merloc-dist"
+BUCKET_PREFIX=${BUCKET_PREFIX:-"merloc-dist"}
+ADD_BOOTSTRAP=${ADD_BOOTSTRAP:-"false"}
 WORKSPACE_DIR="workspace"
 RELEASE_ID="$(($(date +%s)))"
 STATEMENT_ID_BASE="$LAYER_NAME-$RELEASE_ID"
@@ -15,14 +16,18 @@ trap cleanup EXIT
 cleanup
 
 mkdir -p $WORKSPACE_DIR
-cp layer/bootstrap $WORKSPACE_DIR
+if [ "${ADD_BOOTSTRAP}" == "true" ]; then
+  cp layer/bootstrap $WORKSPACE_DIR
+fi
 cp -r layer/extensions $WORKSPACE_DIR
 cp -r src $WORKSPACE_DIR/extensions/merloc-gatekeeper-ext
 cp package.json $WORKSPACE_DIR/extensions/merloc-gatekeeper-ext
 cp package-lock.json $WORKSPACE_DIR/extensions/merloc-gatekeeper-ext
 cp tsconfig.json $WORKSPACE_DIR/extensions/merloc-gatekeeper-ext
 
-chmod +x $WORKSPACE_DIR/bootstrap
+if [ "${ADD_BOOTSTRAP}" == "true" ]; then
+  chmod +x $WORKSPACE_DIR/bootstrap
+fi
 chmod +x $WORKSPACE_DIR/extensions/merloc-gatekeeper
 chmod +x $WORKSPACE_DIR/extensions/merloc-gatekeeper-ext/bootstrap
 
