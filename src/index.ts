@@ -30,6 +30,21 @@ let brokerClient: BrokerClient | undefined;
 let runtime: Runtime;
 let initPromise: Promise<void>;
 
+function _normalizeHeader(header: string): string {
+    let normalizedHeader: string = '';
+    let prevChar: string | undefined;
+    for (let i = 0; i < header.length; i++) {
+        const currentChar: string = header.charAt(i);
+        let normalizedChar: string = currentChar;
+        if (!prevChar || prevChar === '-') {
+            normalizedChar = normalizedChar.toUpperCase();
+        }
+        normalizedHeader += normalizedChar;
+        prevChar = currentChar;
+    }
+    return normalizedHeader;
+}
+
 async function _initExtension(): Promise<ExtensionClient | undefined> {
     logger.debug('Initializing extension ...');
 
@@ -151,7 +166,7 @@ async function _forwardRequest(request: Request, response: Response) {
 
     if (res.headers) {
         for (const [name, value] of Object.entries(res.headers)) {
-            response.setHeader(name, value);
+            response.setHeader(_normalizeHeader(name), value);
         }
     }
     response.status(res.status);
@@ -200,7 +215,7 @@ app.get(NEXT_INVOCATION_PATH, async (request: Request, response: Response) => {
             for (const [name, value] of Object.entries(
                 invocationRequest.headers
             )) {
-                response.setHeader(name, value);
+                response.setHeader(_normalizeHeader(name), value);
             }
         }
         response.status(invocationRequest.status);
