@@ -4,6 +4,7 @@ export type BrokerEnvelope = {
     id: string;
     connectionName: string;
     type: string;
+    time: number;
     responseOf?: string;
     sourceConnectionId?: string;
     sourceConnectionType?: string;

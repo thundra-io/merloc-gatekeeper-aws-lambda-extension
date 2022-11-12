@@ -27,6 +27,7 @@ export default class BrokerClient {
     private connectionName: string;
     private apiKey?: string;
     private connected: boolean;
+    private sessionStartTime: number;
     private messageMap: Map<string, InFlightMessage>;
     private connectPromise: Promise<undefined> | undefined;
     private fragmentedMessages: Map<string, Map<number, BrokerEnvelope>>;
@@ -113,19 +114,29 @@ export default class BrokerClient {
             if (logger.isDebugEnabled()) {
                 logger.debug(`Received message from broker: ${data}`);
             }
-
-            const message: BrokerMessage | undefined = this._doReceive(
-                data.toString()
-            );
+            const envelope: BrokerEnvelope = JSON.parse(data.toString());
+            const message: BrokerMessage | undefined =
+                this._receiveMessage(envelope);
             if (message) {
                 if (message.type === CLIENT_DISCONNECT_MESSAGE_TYPE) {
-                    logger.debug(
-                        'Client disconnected, so closing broker client.'
-                    );
-                    this.close(
-                        WEBSOCKET_NORMAL_CLOSE_CODE,
-                        'Client disconnected, so closing broker client.'
-                    );
+                    if (
+                        envelope.time &&
+                        this.sessionStartTime &&
+                        envelope.time > this.sessionStartTime
+                    ) {
+                        logger.debug(
+                            'Client disconnected, so closing broker client.'
+                        );
+                        this.close(
+                            WEBSOCKET_NORMAL_CLOSE_CODE,
+                            'Client disconnected, so closing broker client.'
+                        );
+                    } else {
+                        logger.debug(
+                            `Received client disconnected event, but event time (${envelope.time}) ` +
+                                `is not after the broker client session start time (${this.sessionStartTime}).`
+                        );
+                    }
                 } else if (message.responseOf) {
                     const inFlightMessage = this.messageMap.get(
                         message.responseOf
@@ -243,12 +254,18 @@ export default class BrokerClient {
         });
     }
 
+    startSession() {
+        this.sessionStartTime = Date.now();
+        logger.debug(`Started session at ${this.sessionStartTime}`);
+    }
+
     async reset() {
         this._clearState(0, 'Reset');
     }
 
-    private _doReceive(data: string): BrokerMessage | undefined {
-        let brokerEnvelope: BrokerEnvelope = JSON.parse(data);
+    private _receiveMessage(
+        brokerEnvelope: BrokerEnvelope
+    ): BrokerMessage | undefined {
         if (!brokerEnvelope || !brokerEnvelope.payload) {
             logger.error('Empty broker payload received');
             return;
@@ -330,13 +347,14 @@ export default class BrokerClient {
         if (brokerPayloadJson.length <= MAX_FRAME_SIZE) {
             const brokerEnvelope: BrokerEnvelope = {
                 id: msg.id,
-                responseOf: msg.responseOf,
                 connectionName: msg.connectionName,
+                type: msg.type,
+                time: Date.now(),
+                responseOf: msg.responseOf,
                 sourceConnectionId: msg.sourceConnectionId,
                 sourceConnectionType: msg.sourceConnectionType,
                 targetConnectionId: msg.targetConnectionId,
                 targetConnectionType: msg.targetConnectionType,
-                type: msg.type,
                 payload: brokerPayloadJson,
                 fragmented: false,
                 fragmentCount: -1,
@@ -362,13 +380,14 @@ export default class BrokerClient {
                 );
                 const brokerEnvelope: BrokerEnvelope = {
                     id: msg.id,
-                    responseOf: msg.responseOf,
                     connectionName: msg.connectionName,
+                    type: msg.type,
+                    time: Date.now(),
+                    responseOf: msg.responseOf,
                     sourceConnectionId: msg.sourceConnectionId,
                     sourceConnectionType: msg.sourceConnectionType,
                     targetConnectionId: msg.targetConnectionId,
                     targetConnectionType: msg.targetConnectionType,
-                    type: msg.type,
                     payload: fragmentedPayload,
                     fragmented: true,
                     fragmentNo: i,

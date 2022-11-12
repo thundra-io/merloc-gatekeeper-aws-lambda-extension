@@ -166,6 +166,8 @@ export default class Runtime {
             let forwardToRealLambdaRuntime = true;
 
             try {
+                this.brokerClient.startSession();
+
                 let connected = await this.brokerClient.checkConnected();
                 logger.debug(`Broker client connected: ${connected}`);
                 if (!connected) {
@@ -176,9 +178,12 @@ export default class Runtime {
                         await this.brokerClient.recreateAndConnect();
                     if (newBrokerClient) {
                         this.brokerClient = newBrokerClient;
+                        this.brokerClient.startSession();
                         connected = true;
                     } else {
-                        logger.debug('');
+                        logger.debug(
+                            'Unable to create new fresh broker client'
+                        );
                     }
                 }
 
