@@ -25,7 +25,7 @@ to be able to use [MerLoc](https://github.com/thundra-io/merloc) as live AWS Lam
 - Set `AWS_LAMBDA_EXEC_WRAPPER` environment variable to `/opt/extensions/merloc-gatekeeper-ext/bootstrap`
 
 > **Warning**
-> `Java 8 on Amazon Linux 1` runtime is not supported
+> **`Java 8 on Amazon Linux 1`** (`java8`) and **`.NET Core 3.1`** (`dotnetcore3.1`) runtimes are **not** supported.
 
 - Set `MERLOC_BROKER_URL` environment variable to the
     - value of the `merloc-broker.merlocbrokerwsapistageurl` property which you get from AWS CDK broker setup output as shown in the example below:
@@ -33,12 +33,22 @@ to be able to use [MerLoc](https://github.com/thundra-io/merloc) as live AWS Lam
 
     - **or** value of the `merlocbrokerwsapistageurl` property which you get from AWS CloudFormation broker setup output as shown in the example below:
       ![Broker URL From AWS CloudFormation Output](./assets/broker-url-from-aws-cf-output.png)
+      
+    > **Note**  
+    > By default, Thundra hosted MerLoc broker is used (so the default value is `wss://merloc-broker.thundra.io`) 
+    > and it requires to sign-up Thundra APM [here](https://apm.thundra.io/) and get your API key.  
     
 ## 2. Configuration
 
-- `MERLOC_BROKER_URL`: This configuration is **MANDATORY**.
+- `MERLOC_BROKER_URL`: This configuration is **OPTIONAL**.
   You need to set this environment variable by broker URL
   as mentioned in the [GateKeeper Setup](#1-setup) section.
+  The default value is `wss://merloc-broker.thundra.io` (Thundra hosted MerLoc broker).
+  
+- `MERLOC_APIKEY`: This configuration is **OPTIONAL**.
+  But it is required (**MANDATORY**) if the broker requires API key (for example Thundra hosted MerLoc broker).
+  If you are using Thundra hosted MerLoc broker (which is default), 
+  you can sign-up Thundra APM [here](https://apm.thundra.io/) and get your API key. 
 
 - `MERLOC_ENABLE`: This configuration is **OPTIONAL**.
   Even though MerLoc GateKeeper layer is added and configured,
@@ -71,9 +81,6 @@ to be able to use [MerLoc](https://github.com/thundra-io/merloc) as live AWS Lam
   So you need to setup a VPN connection from your local machine to the VPC network.
   You can check [this AWS blog post](https://aws.amazon.com/tr/blogs/networking-and-content-delivery/introducing-aws-client-vpn-to-securely-access-aws-and-on-premises-resources/)
   to learn how to do that.
-
-- Currently, AWS Lambda layers are not supported. So if you use layers, they will not be available on your local
-  while running function locally as MerLoc doesn't download and extract layers onto your local environment.
 
 ## 4. Issues and Feedback
 
