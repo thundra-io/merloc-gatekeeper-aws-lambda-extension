@@ -29,3 +29,5 @@ jobs:
           aws-region: us-east-1
       - name: Release AWS Lambda Layer
         run: ./scripts/release-layer.sh
+      - name: Release AWS Lambda Layer for Go
+        run: LAYER_NAME=merloc-gatekeeper-go ADD_BOOTSTRAP=true ./scripts/release-layer.sh
