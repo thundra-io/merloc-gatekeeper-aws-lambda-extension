@@ -7,6 +7,11 @@ elif [ "${IS_LOCAL}" == "true" ]; then
   REDIRECT_RUNTIME_API="false"
 fi
 
+MERLOC_ENV_FILE=.merloc-env
+if [ -f "$MERLOC_ENV_FILE" ]; then
+    source ${MERLOC_ENV_FILE}
+fi
+
 if [ "${REDIRECT_RUNTIME_API}" == "true" ]; then
   AWS_LAMBDA_RUNTIME_API="127.0.0.1:9100" exec -- "$@"
 else
