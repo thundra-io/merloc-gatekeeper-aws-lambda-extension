@@ -20,6 +20,7 @@ import {
     MERLOC_BROKER_URL,
     MERLOC_BROKER_CONNECTION_NAME,
     MERLOC_APIKEY,
+    THUNDRA_BROKER_URL,
 } from './configs';
 
 const app = express();
@@ -88,6 +89,12 @@ async function _initBroker(): Promise<BrokerClient | undefined> {
         if (!MERLOC_BROKER_URL) {
             logger.debug(
                 'Broker URL is empty so requests will be forwarded to the actual handler'
+            );
+            return res(undefined);
+        }
+        if (MERLOC_BROKER_URL === THUNDRA_BROKER_URL && !MERLOC_APIKEY) {
+            logger.warn(
+                'Thundra API key is required when Thundra MerLoc broker (which is default) is used'
             );
             return res(undefined);
         }

@@ -6,11 +6,14 @@ export const MERLOC_BROKER_CONNECTION_NAME_ENV_VAR_NAME =
 export const MERLOC_APIKEY_ENV_VAR_NAME = 'MERLOC_APIKEY';
 export const THUNDRA_APIKEY_ENV_VAR_NAME = 'THUNDRA_APIKEY';
 
+export const THUNDRA_BROKER_URL = 'wss://merloc-broker.thundra.io';
+
 export const MERLOC_ENABLED =
     (process.env[MERLOC_ENABLE_ENV_VAR_NAME] || 'true') === 'true';
 export const MERLOC_DEBUG_ENABLED =
     (process.env[MERLOC_DEBUG_ENABLE_ENV_VAR_NAME] || 'false') === 'true';
-export const MERLOC_BROKER_URL = process.env[MERLOC_BROKER_URL_ENV_VAR_NAME];
+export const MERLOC_BROKER_URL =
+    process.env[MERLOC_BROKER_URL_ENV_VAR_NAME] || THUNDRA_BROKER_URL;
 export const MERLOC_BROKER_CONNECTION_NAME =
     process.env[MERLOC_BROKER_CONNECTION_NAME_ENV_VAR_NAME] || 'default';
 export const MERLOC_APIKEY =
