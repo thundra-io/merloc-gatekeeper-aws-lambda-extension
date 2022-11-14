@@ -5,3 +5,5 @@ export const NEXT_INVOCATION_PATH = '/2018-06-01/runtime/invocation/next';
 export const REQUEST_ID_PATH_PARAM = ':requestId';
 export const INVOCATION_RESPONSE_PATH = `/2018-06-01/runtime/invocation/${REQUEST_ID_PATH_PARAM}/response`;
 export const INVOCATION_ERROR_PATH = `/2018-06-01/runtime/invocation/${REQUEST_ID_PATH_PARAM}/error`;
+export const IS_LOCAL =
+    process.env.AWS_SAM_LOCAL === 'true' || process.env.IS_LOCAL === 'true';

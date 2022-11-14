@@ -14,6 +14,7 @@ import {
     NEXT_INVOCATION_PATH,
     INVOCATION_RESPONSE_PATH,
     INVOCATION_ERROR_PATH,
+    IS_LOCAL,
 } from './constants';
 import {
     MERLOC_ENABLED,
@@ -80,6 +81,12 @@ async function _initBroker(): Promise<BrokerClient | undefined> {
 
     return new Promise<BrokerClient | undefined>((res, rej) => {
         logger.debug('Creating broker client ...');
+        if (IS_LOCAL) {
+            logger.debug(
+                'Running on local so MerLoc is disabled and requests will be forwarded to the actual handler'
+            );
+            return res(undefined);
+        }
         if (!MERLOC_ENABLED) {
             logger.debug(
                 'MerLoc is disabled, so requests will be forwarded to the actual handler'
