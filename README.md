@@ -12,7 +12,10 @@ to be able to use [MerLoc](https://github.com/thundra-io/merloc) as live AWS Lam
 
 ## 1. Setup
 
-- Add MerLoc GateKeeper layer: `arn:aws:lambda:${region}:269863060030:layer:merloc-gatekeeper:${version}`
+- Add MerLoc GateKeeper layer
+  
+  ### Layer Setup for Node.js, Python, Java, .NET and Ruby Runtimes
+  Add MerLoc GateKeeper layer: `arn:aws:lambda:${region}:269863060030:layer:merloc-gatekeeper:${version}`
 
   You can use the latest layer version (shown below) instead of the `${version}` above:
 
@@ -22,10 +25,30 @@ to be able to use [MerLoc](https://github.com/thundra-io/merloc) as live AWS Lam
   So let’s say that you deploy your Lambda function to the `Oregon` (`us-west-2`) region.
   So the layer ARN will be: `arn:aws:lambda:us-west-2:269863060030:layer:merloc-gatekeeper:${version}`
 
-- Set `AWS_LAMBDA_EXEC_WRAPPER` environment variable to `/opt/extensions/merloc-gatekeeper-ext/bootstrap`
+  ### Layer Setup for Go Runtime
+
+  Add MerLoc GateKeeper Go layer: `arn:aws:lambda:${region}:269863060030:layer:merloc-gatekeeper-go:${version}`
+
+  You can use the latest layer version (shown below) instead of the `${version}` above:
+
+  ![merloc-gatekeeper-go](https://api.globadge.com/v1/badgen/aws/lambda/layer/latest-version/us-east-1/269863060030/merloc-gatekeeper-go) (badge powered by [Globadge serverless](https://www.globadge.com/badges/serverless))
+
+  Note that the region of the ARN is dynamic, so you need to change it accordingly to the region where you deploy your function.
+  So let’s say that you deploy your Lambda function to the `Oregon` (`us-west-2`) region.
+  So the layer ARN will be: `arn:aws:lambda:us-west-2:269863060030:layer:merloc-gatekeeper-go:${version}`
+
+
+- Configure AWS Lambda Function
+
+  ### Configure for Node.js, Python, Java, .NET and Ruby Runtimes
+  Set `AWS_LAMBDA_EXEC_WRAPPER` environment variable to `/opt/extensions/merloc-gatekeeper-ext/bootstrap`
+
+  ### Configure for Go Runtime
+  Set runtime to `Custom runtime on Amazon Linux 2` (`provided.al2`)
 
 > **Warning**
 > **`Java 8 on Amazon Linux 1`** (`java8`) and **`.NET Core 3.1`** (`dotnetcore3.1`) runtimes are **not** supported.
+
 
 - Set `MERLOC_BROKER_URL` environment variable to the
     - value of the `merloc-broker.merlocbrokerwsapistageurl` property which you get from AWS CDK broker setup output as shown in the example below:
@@ -35,8 +58,10 @@ to be able to use [MerLoc](https://github.com/thundra-io/merloc) as live AWS Lam
       ![Broker URL From AWS CloudFormation Output](./assets/broker-url-from-aws-cf-output.png)
       
     > **Note**  
-    > By default, Thundra hosted MerLoc broker is used (so the default value is `wss://merloc-broker.thundra.io`) 
-    > and it requires to sign-up Thundra APM [here](https://apm.thundra.io/) and get your API key.  
+    By default, Thundra hosted MerLoc broker is used (so the default value is `wss://merloc-broker.thundra.io`) 
+    and it requires to sign-up Thundra APM [here](https://apm.thundra.io/), get your API key 
+    and set your API key through `MERLOC_APIKEY` environment variable.
+
     
 ## 2. Configuration
 
