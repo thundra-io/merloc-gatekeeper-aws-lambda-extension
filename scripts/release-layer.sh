@@ -5,6 +5,8 @@ REGIONS=( "ap-northeast-1" "ap-northeast-2" "ap-south-1" "ap-southeast-1" "ap-so
 BUCKET_PREFIX=${BUCKET_PREFIX:-"merloc-dist"}
 ADD_NODE_BINARY=${ADD_NODE_BINARY:-"true"}
 ADD_BOOTSTRAP=${ADD_BOOTSTRAP:-"false"}
+COMPATIBLE_RUNTIMES=${COMPATIBLE_RUNTIMES:-"nodejs12.x" "nodejs14.x" "nodejs16.x" "nodejs18.x" "java8.al2" "java11" "python3.7" "python3.8" "python3.9" "dotnet6" "ruby2.7"}
+COMPATIBLE_ARCHITECTURES=${COMPATIBLE_ARCHITECTURES:"x86_64"}
 WORKSPACE_DIR="workspace"
 RELEASE_ID="$(($(date +%s)))"
 STATEMENT_ID_BASE="$LAYER_NAME-$RELEASE_ID"
@@ -67,7 +69,8 @@ do
         --layer-name $LAYER_NAME \
         --description "$LAYER_NAME AWS Lambda extension layer" \
         --content S3Bucket=$ARTIFACT_BUCKET,S3Key=$ARTIFACT_OBJECT \
-        --compatible-architectures "x86_64" \
+        --compatible-runtimes $COMPATIBLE_RUNTIMES \
+        --compatible-architectures $COMPATIBLE_ARCHITECTURES \
         --license-info "Apache License 2" \
         --region $REGION \
         --endpoint-url "https://lambda.$REGION.amazonaws.com" \

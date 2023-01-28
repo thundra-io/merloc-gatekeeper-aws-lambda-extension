@@ -29,7 +29,7 @@ jobs:
           aws-region: us-east-1
       - name: Release AWS Lambda Layer
         run: ./scripts/release-layer.sh
-      - name: Release AWS Lambda Layer for Node.js
-        run: LAYER_NAME=merloc-gatekeeper-nodejs ADD_NODE_BINARY=false ./scripts/release-layer.sh
-      - name: Release AWS Lambda Layer for Go
-        run: LAYER_NAME=merloc-gatekeeper-go ADD_BOOTSTRAP=true ./scripts/release-layer.sh
+      - name: Release AWS Lambda Layer for Node.js runtime
+        run: LAYER_NAME=merloc-gatekeeper-nodejs ADD_NODE_BINARY=false COMPATIBLE_RUNTIMES="nodejs12.x nodejs14.x nodejs16.x nodejs18.x" COMPATIBLE_ARCHITECTURES="x86_64 arm64" ./scripts/release-layer.sh
+      - name: Release AWS Lambda Layer for Go runtime
+        run: LAYER_NAME=merloc-gatekeeper-go ADD_BOOTSTRAP=true COMPATIBLE_RUNTIMES="go1.x" ./scripts/release-layer.sh
