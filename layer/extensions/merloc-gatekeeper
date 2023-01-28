@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-DEFAULT_NODE_BINARY=/usr/local/bin/node
+DEFAULT_NODE_BINARY=/var/lang/bin/node
 MERLOC_NODE_BINARY=/opt/extensions/merloc-gatekeeper-ext/bin/node
 if test -f "$DEFAULT_NODE_BINARY"; then
     MERLOC_NODE_BINARY=$DEFAULT_NODE_BINARY
