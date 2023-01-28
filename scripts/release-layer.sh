@@ -3,6 +3,7 @@
 LAYER_NAME=${LAYER_NAME:-"merloc-gatekeeper"}
 REGIONS=( "ap-northeast-1" "ap-northeast-2" "ap-south-1" "ap-southeast-1" "ap-southeast-2" "ap-east-1" "ca-central-1" "eu-central-1" "eu-north-1" "eu-south-1" "eu-west-1" "eu-west-2" "eu-west-3" "sa-east-1" "us-east-1" "us-east-2" "us-west-1" "us-west-2" )
 BUCKET_PREFIX=${BUCKET_PREFIX:-"merloc-dist"}
+ADD_NODE_BINARY=${ADD_NODE_BINARY:-"true"}
 ADD_BOOTSTRAP=${ADD_BOOTSTRAP:-"false"}
 WORKSPACE_DIR="workspace"
 RELEASE_ID="$(($(date +%s)))"
@@ -20,6 +21,9 @@ if [ "${ADD_BOOTSTRAP}" == "true" ]; then
   cp layer/bootstrap $WORKSPACE_DIR
 fi
 cp -r layer/extensions $WORKSPACE_DIR
+if [ "${ADD_NODE_BINARY}" == "false" ]; then
+  rm -rf $WORKSPACE_DIR/extensions/merloc-gatekeeper-ext/bin
+fi
 cp -r src $WORKSPACE_DIR/extensions/merloc-gatekeeper-ext
 cp package.json $WORKSPACE_DIR/extensions/merloc-gatekeeper-ext
 cp package-lock.json $WORKSPACE_DIR/extensions/merloc-gatekeeper-ext
