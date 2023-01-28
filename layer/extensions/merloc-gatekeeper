@@ -2,9 +2,15 @@
 
 set -eo pipefail
 
+DEFAULT_NODE_BINARY=/usr/local/bin/node
+MERLOC_NODE_BINARY=/opt/extensions/merloc-gatekeeper-ext/bin/node
+if test -f "$DEFAULT_NODE_BINARY"; then
+    MERLOC_NODE_BINARY=$DEFAULT_NODE_BINARY
+fi
+
 # Clear "NODE_OPTIONS" here because "NODE_OPTIONS" is specified for main Lambda process, not for "MerLoc GateKeeper".
 # Otherwise it causes problem when "NODE_OPTIONS" is specified with debug args for main Lambda process.
 # Because in this cases, both main Lambda process and this "MerLoc GateKeeper" extension process will try to start in debug mode
 # and try to listen from same debug port.
 # Also to keep original "NODE_OPTIONS", set its value to "_NODE_OPTIONS" so we can send original value to client.
-_NODE_OPTIONS="$NODE_OPTIONS" NODE_OPTIONS="" /opt/extensions/merloc-gatekeeper-ext/bin/node /opt/extensions/merloc-gatekeeper-ext/dist/index.js
+_NODE_OPTIONS="$NODE_OPTIONS" NODE_OPTIONS="" $MERLOC_NODE_BINARY /opt/extensions/merloc-gatekeeper-ext/dist/index.js
