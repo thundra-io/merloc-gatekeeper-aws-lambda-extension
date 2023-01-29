@@ -14,7 +14,18 @@ to be able to use [MerLoc](https://github.com/thundra-io/merloc) as live AWS Lam
 
 - Add MerLoc GateKeeper layer
   
-  ### Layer Setup for Node.js, Python, Java, .NET and Ruby Runtimes
+  ### Layer Setup for `Nodejs` Runtime
+  Add MerLoc GateKeeper layer: `arn:aws:lambda:${region}:269863060030:layer:merloc-gatekeeper-nodejs:${version}`
+
+  You can use the latest layer version (shown below) instead of the `${version}` above:
+
+  ![merloc-gatekeeper-nodejs](https://api.globadge.com/v1/badgen/aws/lambda/layer/latest-version/us-east-1/269863060030/merloc-gatekeeper-nodejs) (badge powered by [Globadge serverless](https://www.globadge.com/badges/serverless))
+
+  Note that the region of the ARN is dynamic, so you need to change it accordingly to the region where you deploy your function.
+  So let’s say that you deploy your Lambda function to the `Oregon` (`us-west-2`) region.
+  So the layer ARN will be: `arn:aws:lambda:us-west-2:269863060030:layer:merloc-gatekeeper-nodejs:${version}`
+  
+  ### Layer Setup for `Python`, `Java`, `.NET` and `Ruby` Runtimes
   Add MerLoc GateKeeper layer: `arn:aws:lambda:${region}:269863060030:layer:merloc-gatekeeper:${version}`
 
   You can use the latest layer version (shown below) instead of the `${version}` above:
@@ -25,7 +36,7 @@ to be able to use [MerLoc](https://github.com/thundra-io/merloc) as live AWS Lam
   So let’s say that you deploy your Lambda function to the `Oregon` (`us-west-2`) region.
   So the layer ARN will be: `arn:aws:lambda:us-west-2:269863060030:layer:merloc-gatekeeper:${version}`
 
-  ### Layer Setup for Go Runtime
+  ### Layer Setup for `Go` Runtime
 
   Add MerLoc GateKeeper Go layer: `arn:aws:lambda:${region}:269863060030:layer:merloc-gatekeeper-go:${version}`
 
@@ -40,10 +51,10 @@ to be able to use [MerLoc](https://github.com/thundra-io/merloc) as live AWS Lam
 
 - Configure AWS Lambda Function
 
-  ### Configure for Node.js, Python, Java, .NET and Ruby Runtimes
+  ### Configure for `Node.js`, `Python`, `Java`, `.NET` and `Ruby` Runtimes
   Set `AWS_LAMBDA_EXEC_WRAPPER` environment variable to `/opt/extensions/merloc-gatekeeper-ext/bootstrap`
 
-  ### Configure for Go Runtime
+  ### Configure for `Go` Runtime
   Set runtime to `Custom runtime on Amazon Linux 2` (`provided.al2`)
 
 > **Warning**
